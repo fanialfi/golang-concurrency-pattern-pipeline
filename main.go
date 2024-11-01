@@ -1,46 +1,49 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log"
+	"os"
+	"path/filepath"
+	"time"
+
+	"github.com/faniafi/golang-concurrency-pattern-pipeline/lib"
+)
+
+const (
+	totalFile     = 3000
+	contentLength = 5000
+)
+
+var tempPath = "/tmp/go-pipeline"
 
 func main() {
-	// set up the pipeline
-	c := gen(1, 2, 3, 4, 5)
-	out := square(c)
+	log.Println("start")
+	start := time.Now()
 
-	// mengkonsumsi output
-	for n := range out {
-		fmt.Println(n)
+	generateFile()
+
+	duration := time.Since(start)
+	log.Println("done in", duration.Seconds(), "seconds")
+}
+
+func generateFile() {
+	os.RemoveAll(tempPath)
+	os.MkdirAll(tempPath, os.ModePerm)
+
+	for i := 0; i < totalFile; i++ {
+		fileName := filepath.Join(tempPath, fmt.Sprintf("file-%d.txt", i))
+		content := lib.RandomString(contentLength)
+
+		err := os.WriteFile(fileName, []byte(content), os.ModePerm)
+		if err != nil {
+			log.Println("Error writing file", fileName, "with error :", err.Error())
+		}
+
+		if i%100 == 0 && i > 0 {
+			log.Println(i, "file created")
+		}
 	}
 
-}
-
-// sebuah function yang men-convert sebuah list of integer kedalam channel
-// yang mana akan mengeluarkan (emit) bilangan-bilangan bulat dari list satu persatu
-func gen(numbs ...int) <-chan int {
-	out := make(chan int)
-
-	go func() {
-		for _, n := range numbs {
-			out <- n
-		}
-		close(out)
-	}()
-
-	return out
-}
-
-// menerima sebuah integer dari channel dan mereturn sebuah channel yang mengeluarkan (emit)
-// channel yang telah di square (dipangkatkan) untuk setiap integer yang telah diterima dari channel
-func square(in <-chan int) <-chan int {
-	out := make(chan int)
-
-	go func() {
-		for n := range in {
-			out <- n * n
-		}
-
-		close(out)
-	}()
-
-	return out
+	fmt.Printf("%d file created\n", totalFile)
 }
