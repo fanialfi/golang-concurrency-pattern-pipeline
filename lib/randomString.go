@@ -1,6 +1,7 @@
 package lib
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -15,5 +16,7 @@ func RandomString(length int) string {
 		b[i] = letters[randomizer.Intn(len(letters))]
 	}
 
-	return string(b)
+	time := time.Now().UnixNano()
+
+	return fmt.Sprintf("data : %s\ntime : %d\n", string(b), time)
 }
