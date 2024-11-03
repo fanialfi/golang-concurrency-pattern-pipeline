@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/faniafi/golang-concurrency-pattern-pipeline/lib"
 )
@@ -71,6 +72,28 @@ func GetSum(chanInput <-chan FileInfo) <-chan FileInfo {
 
 		// ketika sudah tidak ada penerimaan data dari channel chanInput, / chanInput sudah diclose
 		// maka channel chanOut di close
+		close(chanOut)
+	}()
+
+	return chanOut
+}
+
+func MergeChanFileInfo(chanInMany ...<-chan FileInfo) <-chan FileInfo {
+	wg := new(sync.WaitGroup)
+	chanOut := make(chan FileInfo)
+
+	wg.Add(len(chanInMany))
+	for _, eachChan := range chanInMany {
+		go func(eachChan <-chan FileInfo) {
+			for eachChanData := range eachChan {
+				chanOut <- eachChanData
+			}
+			wg.Done()
+		}(eachChan)
+	}
+
+	go func() {
+		wg.Wait()
 		close(chanOut)
 	}()
 
