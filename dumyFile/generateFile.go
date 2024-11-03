@@ -21,10 +21,6 @@ func GenerateFile() {
 		if err != nil {
 			log.Println("Error writing file", fileName, "with error :", err.Error())
 		}
-
-		if i%100 == 0 && i > 0 {
-			log.Println(i, "file created")
-		}
 	}
 
 	fmt.Printf("%d file created\n", lib.TotalFile)

@@ -1,8 +1,8 @@
 package lib
 
 const (
-	TotalFile     = 10000
-	ContentLength = 5000
+	TotalFile     = 50000
+	ContentLength = 50000
 )
 
 var TempPath = "/tmp/go-pipeline"
